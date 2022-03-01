@@ -38,7 +38,7 @@ const useFetchContacts = (): UseFetchContactsReturnType => {
         }
       })();
     }
-  }, [data, loading]);
+  }, [loading]);
 
   const fetchContacts = () => {
     setLoading(true);
