@@ -5,43 +5,52 @@ import theme from "src/theme";
 import ContactList from "./ContactList";
 
 describe("Contact List", () => {
-  it("initially displays an empty list", () => {
+  it("fulfills definition of done", async () => {
     tlr.render(
       <ThemeProvider theme={theme}>
         <ContactList />
       </ThemeProvider>
     );
     const contactList = tlr.screen.getByLabelText("List of contacts");
+
     // initially displays an empty list
     expect(contactList.children.length).toBe(0);
 
     const ctaButton = tlr.screen.getByRole("button");
-    expect(ctaButton).toHaveTextContent("Fetch contacts");
+    expect(ctaButton).toHaveTextContent("Load more");
 
     userEvent.click(ctaButton);
 
     // this test is ugly, really, and only this way because our apiCall
     // function isn't pure
-    if (ctaButton.ariaDisabled === "true") {
-      while (ctaButton.ariaDisabled === "true") {
-        expect(contactList.children.length).toBe(0);
-        expect(ctaButton.textContent).toBe("Error. Retry?");
-        userEvent.click(ctaButton);
-      }
+    await tlr.waitFor(
+      () => {
+        expect(ctaButton.textContent).not.toBe("Loading...");
+      },
+      { timeout: 3000 }
+    );
+
+    if (ctaButton.textContent === "Load more") {
+      const contactCard = await tlr.screen.findByLabelText("Ron Giles");
+
+      await tlr.waitFor(() => {
+        console.log(contactCard.ariaSelected);
+        expect(contactCard.getAttribute("aria-selected")).toBe("false");
+      });
+
+      userEvent.click(contactCard);
+
+      await tlr.waitFor(() => {
+        expect(contactCard.getAttribute("aria-selected")).toBe("true");
+      });
+
+      userEvent.click(contactCard);
+
+      await tlr.waitFor(() => {
+        expect(contactCard.getAttribute("aria-selected")).toBe("false");
+      });
+    } else {
+      expect(contactList.children.length).toBe(0);
     }
-
-    expect(contactList.children.length).toBeGreaterThan(0);
-
-    const contactCard = contactList.children[0];
-
-    expect(contactCard.ariaSelected).toBe("false");
-
-    userEvent.click(contactCard);
-
-    expect(contactCard.ariaSelected).toBe("true");
-
-    userEvent.click(contactCard);
-
-    expect(contactCard.ariaSelected).toBe("false");
   });
 });
