@@ -15,8 +15,10 @@ const PersonCard = styled(Card)<{ selected?: boolean }>(
 
 export type FirstANdLastName = string;
 
+export type PersonId = string;
+
 export type Person = {
-  id: string;
+  id: PersonId;
   firstNameLastName: FirstANdLastName;
   jobTitle: string;
   emailAddress: string;
@@ -53,17 +55,25 @@ export const Avatar = ({
 function Contact({
   person,
   selected = false,
+  onClick,
 }: {
   person: Person;
   selected?: boolean;
+  onClick: () => void;
 }) {
-  const { firstNameLastName, jobTitle, emailAddress } = person;
+  const { firstNameLastName, jobTitle, emailAddress, id } = person;
 
   return (
-    <PersonCard selected={selected} aria-selected={selected}>
+    <PersonCard
+      aria-labelledby={`${id}-title`}
+      selected={selected}
+      aria-selected={selected}
+      onClick={onClick}
+    >
       <CardHeader
         avatar={<Avatar firstAndLastName={firstNameLastName} />}
         title={firstNameLastName}
+        titleTypographyProps={{ id: `${id}-title` }}
         subheader={jobTitle}
       ></CardHeader>
       <Typography sx={{ color: "text.disabled" }} textAlign="center">
