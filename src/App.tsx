@@ -1,23 +1,16 @@
-import React from "react";
-import apiData from "./api";
-import PersonInfo from "./PersonInfo";
+import { Container } from "@mui/material";
+import { ThemeProvider } from "@mui/system";
+import ContactList from "./features/contacts/ContactList";
+import theme from "./theme";
 
 function App() {
-  const [data, setData] = React.useState([]);
-  const [selected, setSelected] = React.useState([]);
-
   //  TODO fetch contacts using apiData function, handle loading and error states
-
   return (
-    <div className="App">
-      <div className="selected">Selected contacts: {selected.length}</div>
-      <div className="list">
-        {data.map((personInfo) => (
-          // @ts-ignore
-          <PersonInfo key={personInfo.id} data={personInfo} />
-        ))}
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="sm">
+        <ContactList />
+      </Container>
+    </ThemeProvider>
   );
 }
 
