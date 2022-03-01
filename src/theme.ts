@@ -50,6 +50,7 @@ const theme = createTheme({
         subheaderTypographyProps: {
           variant: "body2",
           color: "text.secondary",
+          textTransform: "uppercase",
         },
       },
     },
