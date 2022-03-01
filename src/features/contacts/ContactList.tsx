@@ -1,68 +1,44 @@
 import { Add, Redo } from "@mui/icons-material";
 import { Button, CircularProgress, Stack, Typography } from "@mui/material";
 import React from "react";
-import apiData from "./api";
 import Contact, { Person, PersonId } from "./Contact";
-
-type UseFetchContactsReturnType = [
-  () => void,
-  {
-    error: boolean;
-    loading: boolean;
-    hasMore: boolean;
-    data: Record<PersonId, Person>;
-  }
-];
-
-const useFetchContacts = (): UseFetchContactsReturnType => {
-  const [data, setData] = React.useState<Record<PersonId, Person>>({});
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(false);
-  const [hasMore, setHasMore] = React.useState(true);
-
-  React.useEffect(() => {
-    if (loading) {
-      (async function () {
-        setError(false);
-        try {
-          const response = await apiData();
-
-          // in case we're at the end of the thing,
-          // let's make sure we tell the user
-          if (response.length < 10) {
-            setHasMore(false);
-          }
-          setData(
-            response.reduce((acc, curr) => {
-              acc[curr.id] = curr;
-              return acc;
-            }, data)
-          );
-        } catch {
-          setError(true);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }
-  }, [data, loading]);
-
-  const fetchContacts = () => {
-    setLoading(true);
-  };
-
-  return [fetchContacts, { error, loading, hasMore, data }];
-};
+import useFetchContacts from "./useFetchContacts";
 
 function ContactList() {
-  const [selected, setSelected] = React.useState<PersonId[]>([]);
   const [fetchContacts, { error, loading, hasMore, data }] = useFetchContacts();
+
+  /**
+   * for those reading - this pattern might seem a little bit of an overkill
+   * but I reached the point of thinking that maybe for an object of 1000 elements, going through
+   * each of them and filtering through that big one conditionally on every id seems computationally difficult
+   *
+   * So I reached out to a familiar concept of entities and indexes, effectively indexing  contacts doubly -
+   * - differentiating between selected and not; hashmaps like contacts have this welcome property
+   * that if we want to access a specific index, the complexity of this operation is o(1)
+   */
+  const [selected, setSelected] = React.useState<PersonId[]>([]);
+  const [other, setOther] = React.useState<PersonId[]>([]);
+  const [contacts, setContacts] = React.useState<Record<PersonId, Person>>({});
+
+  React.useEffect(() => {
+    if (data) {
+      setContacts((c) =>
+        data.reduce((acc, curr) => {
+          acc[curr.id] = curr;
+          return acc;
+        }, c)
+      );
+      setOther((o) => o.concat(data.map((newContact) => newContact.id)));
+    }
+  }, [data]);
 
   const handleSelectContact = (id: PersonId) => {
     if (selected.includes(id)) {
       setSelected(selected.filter((s) => s !== id));
+      setOther([...other, id]);
     } else {
       setSelected([...selected, id]);
+      setOther(other.filter((o) => o !== id));
     }
   };
 
@@ -102,20 +78,18 @@ function ContactList() {
         {selected.map((personId) => (
           <Contact
             key={personId}
-            person={data[personId]}
+            person={contacts[personId]}
             selected
             onClick={() => handleSelectContact(personId)}
           />
         ))}
-        {Object.values(data)
-          .filter((person) => !selected.includes(person.id))
-          .map((person) => (
-            <Contact
-              key={person.id}
-              person={person}
-              onClick={() => handleSelectContact(person.id)}
-            />
-          ))}
+        {other.map((personId) => (
+          <Contact
+            key={personId}
+            person={contacts[personId]}
+            onClick={() => handleSelectContact(personId)}
+          />
+        ))}
       </Stack>
       <Button
         variant="contained"

@@ -34,13 +34,13 @@ describe("Contact List", () => {
       const contactCard = await tlr.screen.findByLabelText("Ron Giles");
 
       await tlr.waitFor(() => {
-        console.log(contactCard.ariaSelected);
         expect(contactCard.getAttribute("aria-selected")).toBe("false");
       });
 
       tlr.act(() => userEvent.click(contactCard));
 
       await tlr.waitFor(() => {
+        // can someone explain to me why these tests are so unstable? Beats me
         expect(contactCard.getAttribute("aria-selected")).toBe("true");
       });
 
