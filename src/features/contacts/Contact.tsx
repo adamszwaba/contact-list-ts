@@ -60,7 +60,7 @@ function Contact({
   const { firstNameLastName, jobTitle, emailAddress } = person;
 
   return (
-    <PersonCard selected={selected}>
+    <PersonCard selected={selected} aria-selected={selected}>
       <CardHeader
         avatar={<Avatar firstAndLastName={firstNameLastName} />}
         title={firstNameLastName}

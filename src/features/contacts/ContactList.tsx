@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import React from "react";
 import Contact, { Person } from "./Contact";
 
@@ -37,7 +37,8 @@ function ContactList() {
   return (
     <div>
       <div>Selected contacts: {selected.length}</div>
-      <Stack spacing={2}>
+      <Typography id="contact-list-label">List of contacts</Typography>
+      <Stack spacing={2} aria-labelledby="contact-list-label">
         {selected.map((person) => (
           <Contact key={person.id} person={person} selected />
         ))}
