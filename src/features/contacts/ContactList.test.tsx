@@ -1,56 +1,80 @@
 import { ThemeProvider } from "@mui/material";
-import * as tlr from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import theme from "src/theme";
 import ContactList from "./ContactList";
+import * as apiCall from "./api";
+
+jest.mock("./api.ts");
+
+const spy = jest.spyOn(apiCall, "default");
+
+const setup = () =>
+  render(
+    <ThemeProvider theme={theme}>
+      <ContactList />
+    </ThemeProvider>
+  );
 
 describe("Contact List", () => {
-  it("fulfills definition of done", async () => {
-    tlr.render(
-      <ThemeProvider theme={theme}>
-        <ContactList />
-      </ThemeProvider>
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  it("fulfills happy route", async () => {
+    spy.mockImplementationOnce(() =>
+      Promise.resolve([
+        {
+          id: "1",
+          jobTitle: "Fabricator",
+          emailAddress: "Ron_Giles3711@dionrab.com",
+          firstNameLastName: "Ron Giles",
+        },
+      ])
     );
-    const contactList = tlr.screen.getByLabelText("List of contacts");
+    setup();
+    const contactList = screen.getByLabelText("List of contacts");
 
     // initially displays an empty list
     expect(contactList.children.length).toBe(0);
 
-    const ctaButton = tlr.screen.getByRole("button");
+    const ctaButton = screen.getByRole("button");
     expect(ctaButton).toHaveTextContent("Load more");
 
     userEvent.click(ctaButton);
 
-    // this test is ugly, really, and only this way because our apiCall
-    // function isn't pure
-    await tlr.waitFor(
+    const contactCard = await screen.findByLabelText("Ron Giles");
+
+    // allows toggling
+    expect(contactCard.getAttribute("aria-selected")).toBe("false");
+
+    userEvent.click(contactCard);
+
+    expect(
+      screen.queryByLabelText("Ron Giles")?.getAttribute("aria-selected")
+    ).toBe("true");
+
+    act(() => userEvent.click(contactCard));
+
+    expect(contactCard.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("displays error if error happens", async () => {
+    spy.mockImplementationOnce(() => {
+      throw new Error("Something went wrong");
+    });
+
+    setup();
+
+    const ctaButton = screen.getByRole("button");
+    expect(ctaButton).toHaveTextContent("Load more");
+
+    userEvent.click(ctaButton);
+
+    await waitFor(
       () => {
-        expect(ctaButton.textContent).not.toBe("Loading...");
+        expect(ctaButton.textContent).toBe("Error. Try again?");
       },
       { timeout: 3000 }
     );
-
-    if (ctaButton.textContent === "Load more") {
-      const contactCard = await tlr.screen.findByLabelText("Ron Giles");
-
-      await tlr.waitFor(() => {
-        expect(contactCard.getAttribute("aria-selected")).toBe("false");
-      });
-
-      tlr.act(() => userEvent.click(contactCard));
-
-      await tlr.waitFor(() => {
-        // can someone explain to me why these tests are so unstable? Beats me
-        expect(contactCard.getAttribute("aria-selected")).toBe("true");
-      });
-
-      userEvent.click(contactCard);
-
-      await tlr.waitFor(() => {
-        expect(contactCard.getAttribute("aria-selected")).toBe("false");
-      });
-    } else {
-      expect(contactList.children.length).toBe(0);
-    }
   });
 });

@@ -75,7 +75,7 @@ function Contact({
         title={firstNameLastName}
         titleTypographyProps={{ id: `${id}-title` }}
         subheader={jobTitle}
-      ></CardHeader>
+      />
       <Typography sx={{ color: "text.disabled" }} textAlign="center">
         {emailAddress}
       </Typography>
