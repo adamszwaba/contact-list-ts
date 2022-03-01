@@ -38,7 +38,7 @@ describe("Contact List", () => {
         expect(contactCard.getAttribute("aria-selected")).toBe("false");
       });
 
-      userEvent.click(contactCard);
+      tlr.act(() => userEvent.click(contactCard));
 
       await tlr.waitFor(() => {
         expect(contactCard.getAttribute("aria-selected")).toBe("true");
