@@ -4,7 +4,6 @@ import ContactList from "./features/contacts/ContactList";
 import theme from "./theme";
 
 function App() {
-  //  TODO fetch contacts using apiData function, handle loading and error states
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="sm">
