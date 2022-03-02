@@ -1,55 +1,20 @@
-import { Card, CardHeader, Typography } from "@mui/material";
-import { styled } from "@mui/system";
-
-const PersonCard = styled(Card)<{ selected?: boolean }>(
-  ({ theme, selected = false }) => ({
-    ...(selected && {
-      border: `${theme.spacing(0.25)} solid ${theme.palette.secondary.main}`,
-      "&:hover": {
-        padding: theme.spacing(2),
-        border: `${theme.spacing(0.25)} solid ${theme.palette.secondary.main}`,
-      },
-    }),
-  })
-);
+import { CardHeader, Typography } from "@mui/material";
+import SelectableCard from "src/components/SelectableCard";
+import Avatar from "./Avatar";
 
 export type FirstANdLastName = string;
 
 export type PersonId = string;
 
+export type JobTitle = string;
+
+export type EmailAddress = string;
+
 export type Person = {
   id: PersonId;
   firstNameLastName: FirstANdLastName;
-  jobTitle: string;
-  emailAddress: string;
-};
-
-export const Avatar = ({
-  firstAndLastName,
-}: {
-  firstAndLastName: FirstANdLastName;
-}) => {
-  const initials = firstAndLastName
-    .split(" ")
-    .slice(0, 2)
-    .map((partOfName) => partOfName[0])
-    .join("");
-  return (
-    <Typography
-      variant="h6"
-      sx={{
-        borderWidth: 1,
-        borderRadius: "50%",
-        borderStyle: "solid",
-        borderColor: "common.black",
-        width: "40px",
-        lineHeight: 2,
-        textAlign: "center",
-      }}
-    >
-      {initials}
-    </Typography>
-  );
+  jobTitle: JobTitle;
+  emailAddress: EmailAddress;
 };
 
 function Contact({
@@ -64,7 +29,7 @@ function Contact({
   const { firstNameLastName, jobTitle, emailAddress, id } = person;
 
   return (
-    <PersonCard
+    <SelectableCard
       aria-labelledby={`${id}-title`}
       selected={selected}
       aria-selected={selected}
@@ -79,7 +44,7 @@ function Contact({
       <Typography sx={{ color: "text.disabled" }} textAlign="center">
         {emailAddress}
       </Typography>
-    </PersonCard>
+    </SelectableCard>
   );
 }
 
